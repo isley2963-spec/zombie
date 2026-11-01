@@ -35,7 +35,14 @@ livemedia-creator \
     --iso-only \
     --iso-name "$ISO" \
     --tmp /var/tmp/zombie-lmc \
-    --resultdir "$OUT"
+    --resultdir "$OUT" || {
+    rc=$?
+    echo "=== livemedia-creator failed (exit $rc). Installer logs follow ==="
+    find /var/log /tmp /var/tmp "$OUT" -maxdepth 4 \
+        \( -name 'packaging.log' -o -name 'dnf.librepo.log' -o -name 'anaconda.log' \) 2>/dev/null |
+        while read -r f; do echo "--- $f (last 60 lines)"; tail -n 60 "$f"; done
+    exit "$rc"
+}
 
 sha256sum "$OUT/$ISO" | tee "$OUT/$ISO.sha256"
 ls -lh "$OUT/$ISO"
