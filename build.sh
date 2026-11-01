@@ -24,6 +24,7 @@ dnf install -y lorax lorax-lmc-novirt pykickstart xorriso squashfs-tools
 ksvalidator zombie-os.ks
 
 rm -rf "$OUT" /var/tmp/zombie-lmc
+mkdir -p /var/tmp/zombie-lmc
 livemedia-creator \
     --make-iso \
     --no-virt \
