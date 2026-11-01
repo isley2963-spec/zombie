@@ -22,8 +22,7 @@ services --enabled=NetworkManager,gdm,earlyoom,systemd-oomd,livesys,livesys-late
 # Fedora repositories (the release is chosen at build time with --releasever)
 url --metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-$releasever&arch=$basearch
 repo --name=updates --metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-released-f$releasever&arch=$basearch
-# Hyprland comes from this COPR when it is not in the Fedora repos for your release
-repo --name=hyprland --baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-$releasever-$basearch/
+# Hyprland is added in %post from a COPR, so a missing package cannot break the whole build
 
 %packages
 # ---- Base system and stock Fedora Linux kernel ----
@@ -82,15 +81,11 @@ konsole
 kate
 breeze-icon-theme
 
-# ---- Hyprland ----
-hyprland
-xdg-desktop-portal-hyprland
+# ---- Hyprland (the compositor itself is added in %post, see below) ----
 waybar
 wofi
 foot
 mako
-hyprpaper
-hyprlock
 grim
 slurp
 wl-clipboard
@@ -345,6 +340,22 @@ border-color=#ffffff22
 border-radius=12
 default-timeout=6000
 EOF
+
+# ---------------------------------------------------------------------------
+# Hyprland: installed best-effort. If the COPR has no build for this Fedora
+# release, the ISO is still built (without Hyprland) instead of failing.
+# ---------------------------------------------------------------------------
+cat > /etc/yum.repos.d/hyprland-copr.repo <<'EOF'
+[copr-hyprland]
+name=Hyprland COPR
+baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-$releasever-$basearch/
+enabled=1
+gpgcheck=1
+gpgkey=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/pubkey.gpg
+skip_if_unavailable=1
+EOF
+dnf install -y hyprland xdg-desktop-portal-hyprland hyprpaper hyprlock \
+    || echo "WARNING: Hyprland packages are not available for this Fedora release"
 
 # ---------------------------------------------------------------------------
 # Clean up
