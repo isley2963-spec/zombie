@@ -20,7 +20,7 @@ network --bootproto=dhcp --device=link --activate --hostname=zombie
 services --enabled=NetworkManager,gdm,earlyoom,systemd-oomd,livesys,livesys-late --disabled=sshd,cups,cups-browsed,ModemManager,abrtd,abrt-journal-core,abrt-oops,abrt-vmcore,abrt-xorg,bluetooth
 
 # Fedora repositories (the release is chosen at build time with --releasever)
-repo --name=fedora --metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-$releasever&arch=$basearch
+url --metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-$releasever&arch=$basearch
 repo --name=updates --metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-released-f$releasever&arch=$basearch
 # Hyprland comes from this COPR when it is not in the Fedora repos for your release
 repo --name=hyprland --baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-$releasever-$basearch/
