@@ -13,12 +13,11 @@ firewall --enabled --service=mdns
 xconfig --startxonboot
 zerombr
 clearpart --all
-part / --size=8192 --fstype=ext4
+part / --size=12288 --fstype=ext4
 rootpw --lock --iscrypted locked
 network --bootproto=dhcp --device=link --activate --hostname=zombie
 
-services --enabled=NetworkManager,gdm,earlyoom,systemd-oomd,livesys,livesys-late \
-         --disabled=sshd,cups,cups-browsed,ModemManager,abrtd,abrt-journal-core,abrt-oops,abrt-vmcore,abrt-xorg,bluetooth
+services --enabled=NetworkManager,gdm,earlyoom,systemd-oomd,livesys,livesys-late --disabled=sshd,cups,cups-browsed,ModemManager,abrtd,abrt-journal-core,abrt-oops,abrt-vmcore,abrt-xorg,bluetooth
 
 # Fedora repositories (the release is chosen at build time with --releasever)
 repo --name=fedora --metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-$releasever&arch=$basearch
