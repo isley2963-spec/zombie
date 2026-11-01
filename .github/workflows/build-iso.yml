@@ -30,7 +30,7 @@ jobs:
             -v "$PWD":/work -w /work \
             -e RELEASEVER="${{ inputs.releasever }}" \
             "fedora:${{ inputs.releasever }}" \
-            bash -c "dnf install -y rpm && ./build.sh"
+               bash -c "dnf install -y rpm && bash ./build.sh"
 
       - name: Show the result
         run: |
