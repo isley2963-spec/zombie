@@ -1,0 +1,439 @@
+<title>Zombie OS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Zombie OS is a Fedora-based Linux with GNOME, KDE Plasma and Hyprland that runs on 1 GB of RAM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: one dark, frosted-glass page. A stack of overlapping glass windows opens it;
+   the sections below are glass panels floating over a slow green-and-violet haze. */
+:root {
+  color-scheme: dark;
+  --ink: #070b0a;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-hi: rgba(255, 255, 255, 0.1);
+  --edge: rgba(255, 255, 255, 0.14);
+  --text: #e8efec;
+  --muted: #9fb0aa;
+  --accent: #9fe3c4;
+  --accent-ink: #06231a;
+  --bruise: #6b5bd2;
+  --amber: #b89545;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-block: 0 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-x: hidden;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  background: var(--ink); z-index: 10;
+}
+
+/* ---- Haze behind everything ---- */
+.haze { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.haze i { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
+.haze i:nth-child(1) { width: 52vmax; height: 52vmax; left: -14vmax; top: -12vmax; background: #14543f; animation: drift1 38s ease-in-out infinite alternate; }
+.haze i:nth-child(2) { width: 44vmax; height: 44vmax; right: -12vmax; top: 18vh; background: var(--bruise); opacity: .38; animation: drift2 46s ease-in-out infinite alternate; }
+.haze i:nth-child(3) { width: 34vmax; height: 34vmax; left: 22vw; bottom: -16vmax; background: var(--amber); opacity: .18; animation: drift3 52s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(8vmax, 6vmax); } }
+@keyframes drift2 { to { transform: translate(-7vmax, -5vmax); } }
+@keyframes drift3 { to { transform: translate(6vmax, -6vmax); } }
+
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; }
+
+/* ---- Glass ---- */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+}
+
+/* ---- Nav ---- */
+.nav {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); z-index: 20;
+  margin-top: 12px; padding: 10px 14px 10px 20px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.brand { font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; color: var(--text); text-decoration: none; }
+.brand span { color: var(--accent); }
+.nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.nav a.link { color: var(--muted); text-decoration: none; font-size: 14px; padding: 7px 12px; border-radius: 999px; }
+.nav a.link:hover, .nav a.link:focus-visible { color: var(--text); background: var(--glass-hi); }
+@media (max-width: 640px) { .nav ul { display: none; } }
+
+a:focus-visible, button:focus-visible, summary:focus-visible, [role="tab"]:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; font: 600 15px/1 var(--font-body);
+  padding: 14px 22px; border-radius: 999px; text-decoration: none; cursor: pointer; border: 1px solid var(--edge);
+  color: var(--text); background: var(--glass-hi);
+}
+.btn:hover { background: rgba(255, 255, 255, 0.16); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn.primary:hover { background: #b6efd6; }
+
+/* ---- Hero ---- */
+.hero { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; padding: 72px 0 56px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 18px; }
+h1 {
+  font-family: var(--font-display); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95;
+  font-size: clamp(3.4rem, 9vw, 6.6rem); margin: 0 0 22px; text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.lede { font-size: clamp(1.05rem, 1.6vw, 1.25rem); color: var(--muted); max-width: 34ch; margin: 0 0 30px; }
+.lede b { color: var(--text); font-weight: 600; }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 0; padding: 0; list-style: none; }
+.facts li { font-family: var(--font-mono); font-size: 12px; padding: 6px 12px; border-radius: 999px; color: var(--muted); border: 1px solid var(--edge); background: var(--glass); }
+
+/* Window stack */
+.stack { position: relative; height: 380px; min-width: 0; }
+.win { position: absolute; width: 74%; border-radius: 16px; overflow: hidden; }
+.win .bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid var(--edge); }
+.win .bar b { width: 10px; height: 10px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); }
+.win .bar span { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.win .body { padding: 16px 14px 20px; display: grid; gap: 9px; }
+.win .body u { display: block; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); text-decoration: none; }
+.win .body u:nth-child(2) { width: 82%; } .win .body u:nth-child(3) { width: 58%; } .win .body u:nth-child(4) { width: 70%; }
+.w1 { left: 0; top: 0; z-index: 1; }
+.w2 { left: 13%; top: 30%; z-index: 2; background: rgba(107, 91, 210, 0.14); }
+.w3 { left: 26%; top: 58%; z-index: 3; background: rgba(159, 227, 196, 0.1); }
+.w3 .bar span { color: var(--accent); }
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; padding-top: 48px; gap: 36px; }
+  .stack { height: 330px; }
+}
+
+/* ---- Sections ---- */
+section { padding: 56px 0; scroll-margin-top: 90px; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.9rem, 4vw, 2.8rem); letter-spacing: -0.025em; line-height: 1.05; margin: 0 0 14px; text-wrap: balance; }
+.sub { color: var(--muted); max-width: 58ch; margin: 0 0 32px; }
+
+/* Desktops */
+.desk { border-radius: 24px; padding: 8px; }
+.tabs { display: flex; gap: 6px; padding: 4px; flex-wrap: wrap; }
+.tabs button {
+  font: 600 14px/1 var(--font-body); padding: 12px 18px; border-radius: 16px; cursor: pointer;
+  color: var(--muted); background: transparent; border: 1px solid transparent;
+}
+.tabs button:hover { color: var(--text); }
+.tabs button[aria-selected="true"] { color: var(--text); background: var(--glass-hi); border-color: var(--edge); }
+.panel { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 32px; padding: 28px 24px 24px; }
+.panel[hidden] { display: none !important; }
+.panel h3 { font-family: var(--font-display); font-size: 1.7rem; margin: 0 0 10px; letter-spacing: -0.02em; }
+.panel p { color: var(--muted); margin: 0 0 14px; max-width: 54ch; }
+.panel dl { margin: 0; display: grid; gap: 18px; align-content: start; min-width: 0; }
+.panel dt { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.panel dd { margin: 0; }
+.meter { display: flex; gap: 5px; align-items: center; }
+.meter i { width: 38px; height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); }
+.meter i.on { background: var(--accent); }
+.meter span { margin-left: 8px; font-size: 14px; color: var(--muted); }
+.keys { display: grid; gap: 6px; font-family: var(--font-mono); font-size: 13px; }
+.keys div { display: flex; justify-content: space-between; gap: 12px; }
+.keys kbd { color: var(--accent); font: inherit; }
+@media (max-width: 760px) { .panel { grid-template-columns: 1fr; padding: 22px 14px 14px; gap: 24px; } }
+
+/* 1 GB */
+.split { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 40px; align-items: start; }
+.big { font-family: var(--font-display); font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; font-size: clamp(5rem, 15vw, 10rem); color: var(--accent); margin: 0; }
+.big small { font-size: 0.32em; letter-spacing: -0.01em; color: var(--text); margin-left: 6px; }
+.tunes { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.tunes li { padding: 16px 18px; border-radius: 16px; display: grid; gap: 2px; }
+.tunes b { font-weight: 600; }
+.tunes span { color: var(--muted); font-size: 15px; }
+.note { margin-top: 18px; padding: 14px 18px; border-radius: 14px; color: var(--muted); font-size: 15px; border: 1px dashed var(--edge); }
+.note b { color: var(--text); font-weight: 600; }
+@media (max-width: 860px) { .split { grid-template-columns: 1fr; gap: 24px; } }
+
+/* Spec */
+.spec { border-radius: 22px; overflow: hidden; }
+.spec table { width: 100%; border-collapse: collapse; }
+.spec th, .spec td { text-align: left; padding: 15px 22px; vertical-align: top; }
+.spec tr + tr > * { border-top: 1px solid var(--edge); }
+.spec th { width: 34%; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 500; padding-top: 18px; }
+.spec td { color: var(--text); }
+.scroll { overflow-x: auto; }
+
+/* Build steps */
+.steps { display: grid; gap: 14px; }
+.step { border-radius: 20px; padding: 20px 22px; display: grid; gap: 10px; min-width: 0; }
+.step h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.step p { margin: 0; color: var(--muted); font-size: 15px; }
+.code { position: relative; border-radius: 12px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--edge); min-width: 0; }
+.code pre { margin: 0; padding: 14px 92px 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 13px; line-height: 1.7; color: var(--text); }
+.code pre i { font-style: normal; color: var(--muted); }
+.copy {
+  position: absolute; top: 8px; right: 8px; font: 500 12px/1 var(--font-mono); padding: 8px 12px; border-radius: 999px;
+  color: var(--text); background: var(--glass-hi); border: 1px solid var(--edge); cursor: pointer;
+}
+.copy:hover { background: rgba(255, 255, 255, 0.18); }
+.warn { color: #e3c97e; }
+
+/* FAQ */
+.faq { display: grid; gap: 10px; }
+.faq details { border-radius: 18px; padding: 0 20px; }
+.faq summary { cursor: pointer; padding: 18px 0; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-family: var(--font-mono); color: var(--accent); }
+.faq details[open] summary::after { content: "\2212"; }
+.faq p { margin: 0 0 18px; color: var(--muted); max-width: 70ch; }
+
+footer { padding: 36px 0 12px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--edge); margin-top: 24px; display: grid; gap: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .haze i { animation: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+
+<div class="haze" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="wrap">
+  <nav class="nav glass" aria-label="Main">
+    <a class="brand" href="#top">Zombie<span>OS</span></a>
+    <ul>
+      <li><a class="link" href="#desktops">Desktops</a></li>
+      <li><a class="link" href="#one-gb">1 GB</a></li>
+      <li><a class="link" href="#inside">Inside</a></li>
+      <li><a class="link" href="#get">Get it</a></li>
+      <li><a class="link" href="#faq">FAQ</a></li>
+    </ul>
+    <a class="btn primary" href="#get" style="padding:10px 18px;font-size:14px">Build the ISO</a>
+  </nav>
+
+  <header class="hero" id="top">
+    <div>
+      <p class="eyebrow">Fedora based &middot; Linux kernel &middot; x86_64</p>
+      <h1>Zombie <em>OS</em></h1>
+      <p class="lede">A Red Hat family Linux that runs on <b>1 GB of RAM</b> and installs with GNOME, KDE Plasma and Hyprland, all in dark frosted glass.</p>
+      <div class="cta">
+        <a class="btn primary" href="#get">Build the ISO</a>
+        <a class="btn" href="#desktops">Compare the desktops</a>
+      </div>
+      <ul class="facts">
+        <li>RPM + dnf</li>
+        <li>systemd</li>
+        <li>SELinux on</li>
+        <li>zram swap</li>
+      </ul>
+    </div>
+    <div class="stack" aria-hidden="true">
+      <div class="win glass w1"><div class="bar"><b></b><b></b><b></b><span>GNOME</span></div><div class="body"><u></u><u></u><u></u><u></u></div></div>
+      <div class="win glass w2"><div class="bar"><b></b><b></b><b></b><span>Plasma</span></div><div class="body"><u></u><u></u><u></u><u></u></div></div>
+      <div class="win glass w3"><div class="bar"><b></b><b></b><b></b><span>Hyprland</span></div><div class="body"><u></u><u></u><u></u><u></u></div></div>
+    </div>
+  </header>
+
+  <section id="desktops">
+    <p class="eyebrow">Desktops</p>
+    <h2>Three desktops, one login screen</h2>
+    <p class="sub">All three are installed. You choose one at sign-in and run one at a time, which is how Zombie OS stays inside 1 GB.</p>
+
+    <div class="desk glass">
+      <div class="tabs" role="tablist" aria-label="Desktop environments">
+        <button role="tab" id="tab-gnome" aria-controls="panel-gnome" aria-selected="true">GNOME</button>
+        <button role="tab" id="tab-plasma" aria-controls="panel-plasma" aria-selected="false" tabindex="-1">KDE Plasma</button>
+        <button role="tab" id="tab-hypr" aria-controls="panel-hypr" aria-selected="false" tabindex="-1">Hyprland</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-gnome" aria-labelledby="tab-gnome">
+        <div>
+          <h3>GNOME</h3>
+          <p>A clean, touch-friendly desktop with an Activities overview and almost nothing to configure. It is the most polished of the three and the heaviest.</p>
+          <p>Zombie OS sets it to the dark style by default and removes the file indexer, the software center and the welcome tour to save memory.</p>
+        </div>
+        <dl>
+          <div><dt>Session</dt><dd>GNOME on Wayland</dd></div>
+          <div><dt>Memory use, relative</dt><dd><div class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><span>Heaviest</span></div></dd></div>
+          <div><dt>Good for</dt><dd>People who want it to just work</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-plasma" aria-labelledby="tab-plasma" hidden>
+        <div>
+          <h3>KDE Plasma</h3>
+          <p>A familiar panel-and-menu layout with deep customization. Plasma has the best built-in blur and translucency of the three.</p>
+          <p>Zombie OS starts it in Breeze Dark with the blur and translucency effects turned on.</p>
+        </div>
+        <dl>
+          <div><dt>Session</dt><dd>Plasma on Wayland</dd></div>
+          <div><dt>Memory use, relative</dt><dd><div class="meter"><i class="on"></i><i class="on"></i><i></i><span>Medium</span></div></dd></div>
+          <div><dt>Good for</dt><dd>Switchers who want control</dd></div>
+        </dl>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-hypr" aria-labelledby="tab-hypr" hidden>
+        <div>
+          <h3>Hyprland</h3>
+          <p>A tiling Wayland compositor driven from the keyboard. It uses the least memory, so it is the best fit for a 1 GB machine.</p>
+          <p>Zombie OS ships a ready config with blurred glass windows, a translucent Waybar, a launcher, notifications and a lock screen. Animations are off to save GPU and RAM.</p>
+        </div>
+        <dl>
+          <div><dt>Session</dt><dd>Hyprland on Wayland</dd></div>
+          <div><dt>Memory use, relative</dt><dd><div class="meter"><i class="on"></i><i></i><i></i><span>Lightest</span></div></dd></div>
+          <div>
+            <dt>Default keys</dt>
+            <dd class="keys">
+              <div><span>Terminal</span><kbd>Super + Enter</kbd></div>
+              <div><span>Launcher</span><kbd>Super + D</kbd></div>
+              <div><span>Close window</span><kbd>Super + Q</kbd></div>
+              <div><span>Workspace 1 to 5</span><kbd>Super + 1&ndash;5</kbd></div>
+              <div><span>Lock</span><kbd>Super + L</kbd></div>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="one-gb">
+    <div class="split">
+      <div>
+        <p class="eyebrow">Memory</p>
+        <p class="big">1<small>GB RAM</small></p>
+      </div>
+      <div>
+        <h2>Tuned to fit a small machine</h2>
+        <p class="sub">Zombie OS keeps the stock Fedora kernel and trims everything around it.</p>
+        <ul class="tunes">
+          <li class="glass"><b>Compressed swap in RAM</b><span>zram with zstd gives you roughly double the working room before the disk is touched.</span></li>
+          <li class="glass"><b>earlyoom on guard</b><span>Kills a runaway app before the system freezes, and never touches your desktop shell.</span></li>
+          <li class="glass"><b>Fewer background services</b><span>No file indexer, software center, printing service, crash reporter or Bluetooth stack running by default.</span></li>
+          <li class="glass"><b>A small journal</b><span>Logs live in memory and are capped at 24 MB.</span></li>
+        </ul>
+        <p class="note"><b>Live USB vs. installed.</b> The live ISO runs from memory and needs more than 1 GB to be pleasant. Install it to disk for the 1 GB experience, and pick Hyprland if memory is tight.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="inside">
+    <p class="eyebrow">Inside</p>
+    <h2>What Zombie OS is made of</h2>
+    <p class="sub">Official Fedora packages and the Fedora kernel, plus a kickstart file that sets everything up.</p>
+    <div class="spec glass scroll">
+      <table>
+        <tr><th>Base</th><td>Fedora Linux, from the Red Hat family (RPM packages, dnf)</td></tr>
+        <tr><th>Kernel</th><td>The stock Linux kernel that Fedora ships</td></tr>
+        <tr><th>Init</th><td>systemd</td></tr>
+        <tr><th>Login screen</th><td>GDM, listing GNOME, Plasma and Hyprland sessions</td></tr>
+        <tr><th>Installer</th><td>Anaconda, from the live session</td></tr>
+        <tr><th>Architecture</th><td>x86_64, UEFI and BIOS boot</td></tr>
+        <tr><th>Security defaults</th><td>SELinux enforcing, firewalld on, basic kernel hardening</td></tr>
+        <tr><th>Look</th><td>Dark frosted glass: blur and translucency on all three desktops</td></tr>
+        <tr><th>Build</th><td>One kickstart (<code>zombie-os.ks</code>) and one script (<code>build.sh</code>)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="get">
+    <p class="eyebrow">Get it</p>
+    <h2>Build your own ISO</h2>
+    <p class="sub">There is no prebuilt download yet. You build the ISO yourself on any Fedora machine with internet access and about 25 GB free. The size depends on the build, so it is not a fixed number.</p>
+
+    <div class="steps">
+      <div class="step glass">
+        <h3>1. Unpack the project</h3>
+        <div class="code"><pre id="c1">unzip zombie-os-fedora.zip
+cd zombie-os-fedora</pre><button class="copy" data-target="c1" type="button">Copy</button></div>
+      </div>
+      <div class="step glass">
+        <h3>2. Build</h3>
+        <p>This validates the kickstart, downloads the packages and produces the ISO and a checksum in <code>out/</code>.</p>
+        <div class="code"><pre id="c2">sudo ./build.sh</pre><button class="copy" data-target="c2" type="button">Copy</button></div>
+      </div>
+      <div class="step glass">
+        <h3>3. Write it to a USB stick</h3>
+        <p class="warn">Replace /dev/sdX with your USB stick. This erases it.</p>
+        <div class="code"><pre id="c3">sha256sum -c out/zombie-os-*.iso.sha256
+sudo dd if=out/zombie-os-*.iso of=/dev/sdX bs=4M status=progress oflag=sync</pre><button class="copy" data-target="c3" type="button">Copy</button></div>
+      </div>
+      <div class="step glass">
+        <h3>4. Boot, pick a desktop, install</h3>
+        <p>Boot from the stick, run the installer from the live session, and choose GNOME, Plasma or Hyprland at the login screen.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <p class="eyebrow">Questions</p>
+    <h2>Before you build</h2>
+    <div class="faq">
+      <details class="glass"><summary>Can all three desktops run at once?</summary><p>No. All three are installed and you pick one at the login screen. Running them together would not fit in 1 GB.</p></details>
+      <details class="glass"><summary>Why Fedora and not Red Hat Enterprise Linux?</summary><p>Fedora is free to use and redistribute, it is current, and it packages the desktops Zombie OS needs. RHEL requires a subscription and is aimed at servers.</p></details>
+      <details class="glass"><summary>How big is the ISO?</summary><p>Several GB, because it carries three desktops. The size comes from what is inside and cannot be set to an exact number. To make it smaller, remove the packages for a desktop you do not want from <code>zombie-os.ks</code> and rebuild.</p></details>
+      <details class="glass"><summary>Is it a new kernel?</summary><p>No. Zombie OS uses the standard Linux kernel from Fedora, so hardware support and security updates come straight from upstream Fedora.</p></details>
+      <details class="glass"><summary>Does Hyprland work on any machine?</summary><p>It needs a working GPU driver. It runs on most real hardware and in virtual machines with 3D acceleration enabled. If it will not start, use Plasma or GNOME.</p></details>
+      <details class="glass"><summary>Is there a prebuilt download?</summary><p>Not yet. Building it yourself takes one command, and you can read every package and setting in the kickstart first.</p></details>
+    </div>
+  </section>
+
+  <footer>
+    <div><b style="color:var(--text)">Zombie OS</b> is an independent project built on Fedora Linux.</div>
+    <div>Fedora is a trademark of Red Hat, Inc. Zombie OS is not affiliated with or endorsed by Red Hat or the Fedora Project. GNOME, KDE Plasma and Hyprland belong to their respective projects.</div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // Desktop tabs
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      var n = null;
+      if (e.key === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+      if (e.key === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+      if (n) { e.preventDefault(); select(n); n.focus(); }
+    });
+  });
+
+  // Copy buttons
+  document.querySelectorAll('.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = document.getElementById(btn.getAttribute('data-target'));
+      var text = pre.innerText;
+      function done(msg) {
+        btn.textContent = msg;
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1600);
+      }
+      function fallback() {
+        var r = document.createRange();
+        r.selectNodeContents(pre);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        done('Selected');
+      }
+      try {
+        navigator.clipboard.writeText(text).then(function () { done('Copied'); }, fallback);
+      } catch (e) { fallback(); }
+    });
+  });
+})();
+</script>

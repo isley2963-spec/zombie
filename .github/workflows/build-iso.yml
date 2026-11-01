@@ -1,0 +1,49 @@
+name: Build Zombie OS ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      releasever:
+        description: "Fedora release to build on (for example 43)"
+        default: "43"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Check out the project
+        uses: actions/checkout@v4
+
+      - name: Free up disk space on the runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force
+          df -h /
+
+      - name: Build the ISO inside a Fedora container
+        run: |
+          mkdir -p out
+          sudo docker run --rm --privileged \
+            -v /dev:/dev \
+            -v "$PWD":/work -w /work \
+            -e RELEASEVER="${{ inputs.releasever }}" \
+            "fedora:${{ inputs.releasever }}" \
+            bash -c "dnf install -y rpm && ./build.sh"
+
+      - name: Show the result
+        run: |
+          ls -lh out/
+          cat out/*.sha256
+
+      - name: Upload the ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: zombie-os-iso
+          path: |
+            out/*.iso
+            out/*.sha256
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
